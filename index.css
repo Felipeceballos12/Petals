@@ -1,0 +1,77 @@
+body {
+  font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  margin: 0;
+  background-color: #f0f0f0;
+}
+.animation-container {
+  background: white;
+  padding: 40px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+svg {
+  display: block;
+  margin: 0 auto 30px;
+  width: 300px;
+  height: 300px;
+}
+
+.svgPetal .petal {
+  fill: url(#petalGradient);
+  transition: none;
+}
+
+.svgPetal .center-circle {
+  fill: url(#centerGradient);
+  opacity: 20%;
+}
+
+.icon path {
+  fill: #1d1d1d;
+  transform-origin: center;
+}
+
+.controls {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+button {
+  padding: 10px 20px;
+  font-size: 16px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+#startBtn {
+  background-color: #4caf50;
+  color: white;
+}
+
+#pauseBtn {
+  background-color: #ff9800;
+  color: white;
+}
+
+#stopBtn {
+  background-color: #f44336;
+  color: white;
+}

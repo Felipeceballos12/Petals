@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>One petal animation</title>
+        <link rel="stylesheet" href="index.css" />
+    </head>
+    <body>
+        <div class="animation-container">
+            <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <radialGradient id="centerGradient">
+                        <stop offset="0%" stop-color="#ffe680" />
+                        <stop offset="100%" stop-color="#ffcc00" />
+                    </radialGradient>
+                    <radialGradient id="petalGradient">
+                        <stop offset="0%" stop-color="#ff99cc" />
+                        <stop offset="100%" stop-color="#ff3377" />
+                    </radialGradient>
+                </defs>
+                <ellipse
+                    id="petal0"
+                    class="petal"
+                    cx="100"
+                    cy="50"
+                    rx="20"
+                    ry="30"
+                />
+                <ellipse
+                    id="petal30"
+                    class="petal"
+                    cx="100"
+                    cy="50"
+                    rx="20"
+                    ry="30"
+                    transform="rotate(30 100 100)"
+                />
+                <ellipse
+                    id="petal60"
+                    class="petal"
+                    cx="100"
+                    cy="50"
+                    rx="20"
+                    ry="30"
+                    transform="rotate(60 100 100)"
+                />
+                <ellipse
+                    id="petal90"
+                    class="petal"
+                    cx="100"
+                    cy="50"
+                    rx="20"
+                    ry="30"
+                    transform="rotate(90 100 100)"
+                />
+                <ellipse
+                    id="petal120"
+                    class="petal"
+                    cx="100"
+                    cy="50"
+                    rx="20"
+                    ry="30"
+                    transform="rotate(120 100 100)"
+                />
+                <ellipse
+                    id="petal150"
+                    class="petal"
+                    cx="100"
+                    cy="50"
+                    rx="20"
+                    ry="30"
+                    transform="rotate(150 100 100)"
+                />
+                <ellipse
+                    id="petal180"
+                    class="petal"
+                    cx="100"
+                    cy="50"
+                    rx="20"
+                    ry="30"
+                    transform="rotate(180 100 100)"
+                />
+                <ellipse
+                    id="petal210"
+                    class="petal"
+                    cx="100"
+                    cy="50"
+                    rx="20"
+                    ry="30"
+                    transform="rotate(210 100 100)"
+                />
+                <ellipse
+                    id="petal240"
+                    class="petal"
+                    cx="100"
+                    cy="50"
+                    rx="20"
+                    ry="30"
+                    transform="rotate(240 100 100)"
+                />
+                <ellipse
+                    id="petal270"
+                    class="petal"
+                    cx="100"
+                    cy="50"
+                    rx="20"
+                    ry="30"
+                    transform="rotate(270 100 100)"
+                />
+                <ellipse
+                    id="petal300"
+                    class="petal"
+                    cx="100"
+                    cy="50"
+                    rx="20"
+                    ry="30"
+                    transform="rotate(300 100 100)"
+                />
+                <ellipse
+                    id="petal330"
+                    class="petal"
+                    cx="100"
+                    cy="50"
+                    rx="20"
+                    ry="30"
+                    transform="rotate(330 100 100)"
+                />
+                <circle class="center-circle" cx="100" cy="100" r="30" />
+            </svg>
+
+            <div class="controls">
+                <button id="startBtn">Start</button>
+                <button id="pauseBtn" disabled>Pause</button>
+                <button id="stopBtn" disabled>Stop</button>
+                <button id="noPetalsBtn">No Petals</button>
+            </div>
+        </div>
+        <script src="./script.js"></script>
+    </body>
+</html>
