@@ -1,26 +1,39 @@
 // CONSTANTS
 const PETAL_STATES = {
   VISIBLE: {
-    scale: 1,
-    translateY: 0,
-    opacity: 1,
+    cy: 50,
+    rx: 20,
+    ry: 30,
   },
   HIDDEN: {
-    scale: 0.4,
-    translateY: 20,
-    opacity: 0,
+    cy: 70,
+    rx: 0,
+    ry: 0,
   },
   RESET: {
-    scale: 0,
-    translateY: 0,
-    opacity: 0,
+    cx: 100,
+    cy: 100,
+    rx: 0,
+    ry: 0,
+  },
+};
+
+const NEW_PETAL_STATES = {
+  VISIBLE: {
+    transform: 'scale(1)',
+  },
+  HIDDEN: {
+    transform: 'scale(0.47)',
+  },
+  RESET: {
+    transform: 'scale(0)',
   },
 };
 
 const ANIMATION = {
   DURATION: 200,
   MIN_DURATION: 100,
-  MAX_SCALE: 1, // Used for calculating effective duration
+  MAX_RADIUS: 20, // Used for calculating effective duration
 };
 
 const STATES = {
@@ -41,86 +54,44 @@ const pauseBtn = document.getElementById('pauseBtn');
 const stopBtn = document.getElementById('stopBtn');
 
 const PETALS = Array.from(document.getElementsByClassName('petal'));
-console.log({ PETALS });
 
 // STATE VARIABLES
 let animationState = STATES.IDLE;
 let petalMode = MODES.REMOVE;
 let currentPetalIndex = 0;
 
-// TRANSFORM UTILITY FUNCTIONS
-function parseTransform(transformString) {
-  const scaleMatch = transformString.match(/scale\(([^)]+)\)/);
-  const translateMatch = transformString.match(/translate\(([^)]+)\)/);
-
-  const scale = scaleMatch ? parseFloat(scaleMatch[1]) : 1;
-  const translateValues = translateMatch
-    ? translateMatch[1].split(',').map((v) => parseFloat(v.trim()))
-    : [0, 0];
-
-  return {
-    scale: scale,
-    translateX: translateValues[0] || 0,
-    translateY: translateValues[1] || 0,
-  };
-}
-
-function createTransformString(scale, translateX = 0, translateY = 0) {
-  return `scale(${scale}) translate(${translateX}px, ${translateY}px)`;
-}
-
-function interpolateTransforms(start, end, progress) {
-  return {
-    scale: start.scale + (end.scale - start.scale) * progress,
-    translateX:
-      start.translateX + (end.translateX - start.translateX) * progress,
-    translateY:
-      start.translateY + (end.translateY - start.translateY) * progress,
-    opacity: start.opacity + (end.opacity - start.opacity) * progress,
-  };
-}
-
 // use for debugging
 function log() {
   console.log({ animationState, petalMode, currentPetalIndex });
 }
 
-function getTargetPetalTransform(mode) {
+function getTargetPetalPosition(mode) {
   return mode === MODES.REMOVE ? PETAL_STATES.HIDDEN : PETAL_STATES.VISIBLE;
 }
 
-function getCurrentPetalTransform(petal) {
-  const transformString =
-    petal.style.transform || petal.getAttribute('transform') || 'scale(1)';
-  const transform = parseTransform(transformString);
-  const opacity = parseFloat(petal.style.opacity) || 1;
-
+function getCurrentPetalPosition(petal) {
+  console.log({ petal });
   return {
-    ...transform,
-    opacity: opacity,
+    transform: parseFloat(petal.getAttribute('transform')),
   };
 }
 
-function updatePetalTransform(petal, transform) {
-  const transformString = createTransformString(
-    transform.scale,
-    transform.translateX,
-    transform.translateY
-  );
-  petal.style.transform = transformString;
-  petal.style.opacity = transform.opacity;
+function updatePetalPosition(petal, state) {
+  petal.setAttribute('transform', state.ry);
 }
 
-// calculates how long the animation of petal should be based on its transform
-function calculateAnimationDuration(startTransform, targetTransform) {
-  const remainingScale = Math.abs(targetTransform.scale - startTransform.scale);
-  const remainingRatio = remainingScale / ANIMATION.MAX_SCALE;
+// calculates how long the animation of petal should be based on its position
+function calculateAnimationDuration(startPosition, targetPosition) {
+  const remainingRx = Math.abs(targetPosition.rx - startPosition.rx);
+  const remainingRatio = remainingRx / ANIMATION.MAX_RADIUS;
   return Math.max(remainingRatio * ANIMATION.DURATION, ANIMATION.MIN_DURATION);
 }
 
-// calculates where the next transform should be, based on start transform, target transform and current progress
-function calculatePetalTransform(startTransform, targetTransform, progress) {
-  return interpolateTransforms(startTransform, targetTransform, progress);
+// calculates where the next position should be, based on start position, target position and current progress
+function calculatePetalPosition(startPosition, targetPosition, progress) {
+  return {
+    cy: startPosition.cy + (targetPosition.cy - startPosition.cy) * progress,
+  };
 }
 
 function animatePetal(petal) {
@@ -132,36 +103,31 @@ function animatePetal(petal) {
     }
 
     const startTime = Date.now();
-    const startTransform = getCurrentPetalTransform(petal);
-    const targetTransform = getTargetPetalTransform(petalMode);
+    const startPosition = getCurrentPetalPosition(petal);
+    const targetPosition = getTargetPetalPosition(petalMode);
     const animationDuration = calculateAnimationDuration(
-      startTransform,
-      targetTransform
+      startPosition,
+      targetPosition
     );
-    console.log({
-      startTransform,
-      targetTransform,
-      animationDuration,
-      petalMode,
-    });
 
     function animate() {
       const elapsed = Date.now() - startTime;
       const progress = Math.min(elapsed / animationDuration, 1);
 
-      const currentTransform = calculatePetalTransform(
-        startTransform,
-        targetTransform,
+      const currentPosition = calculatePetalPosition(
+        startPosition,
+        targetPosition,
         progress
       );
-      updatePetalTransform(petal, currentTransform);
+      updatePetalPosition(petal, currentPosition);
 
       if (progress < 1) {
         petal.animationFrame = requestAnimationFrame(animate);
       } else {
         // Ensure exact final state
-        updatePetalTransform(petal, targetTransform);
+        updatePetalPosition(petal, targetPosition);
         petal.animationFrame = null;
+        cancelAnimationFrame(petal.animationFrame); // not sure if this is needed or not
         resolve();
       }
     }
@@ -273,13 +239,13 @@ startBtn.addEventListener('click', () => {
 
 /* 2. Pause Button
  * First Click:
- * Freeze the animation on the exact current frame.
+ * Freeze the animation on the exact current frame.
  * Second Click (Resume):
- * Continue the animation clockwise from the paused state.
+ * Continue the animation clockwise from the paused state.
  * Stop After Pause:
- * If Stop is clicked while paused, reverse the animation (see Stop Button). */
+ * If Stop is clicked while paused, reverse the animation (see Stop Button). */
 pauseBtn.addEventListener('click', () => {
-  const currentPetal = PETALS[currentPetalIndex];
+  /* const currentPetal = PETALS[currentPetalIndex];
 
   if (animationState === STATES.PLAYING) {
     // pause
@@ -294,18 +260,18 @@ pauseBtn.addEventListener('click', () => {
     setPlayingState();
     forward();
     log();
-  }
+  } */
 });
 
 /* ⠀3. Stop Button
  * Behavior:
- * Immediately halt the animation.
- * Reverse the petal sequence (counter-clockwise) until all petals return to their original state.
+ * Immediately halt the animation.
+ * Reverse the petal sequence (counter-clockwise) until all petals return to their original state.
  * Interruption Handling:
- * If Play is clicked during the reverse (Stop) cycle:
- * Abort the reversal and resume the standard clockwise animation. */
+ * If Play is clicked during the reverse (Stop) cycle:
+ * Abort the reversal and resume the standard clockwise animation. */
 stopBtn.addEventListener('click', () => {
-  petalMode = petalMode === MODES.ADD ? MODES.REMOVE : MODES.ADD;
+  /* petalMode = petalMode === MODES.ADD ? MODES.REMOVE : MODES.ADD;
 
   if (animationState === STATES.PLAYING) {
     setStoppingState();
@@ -315,5 +281,5 @@ stopBtn.addEventListener('click', () => {
     setStoppingState();
     reverse();
     log();
-  }
+  } */
 });

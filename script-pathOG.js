@@ -3,17 +3,14 @@ const PETAL_STATES = {
   VISIBLE: {
     scale: 1,
     translateY: 0,
-    opacity: 1,
   },
   HIDDEN: {
     scale: 0.4,
     translateY: 20,
-    opacity: 0,
   },
   RESET: {
     scale: 0,
     translateY: 0,
-    opacity: 0,
   },
 };
 
@@ -76,7 +73,6 @@ function interpolateTransforms(start, end, progress) {
       start.translateX + (end.translateX - start.translateX) * progress,
     translateY:
       start.translateY + (end.translateY - start.translateY) * progress,
-    opacity: start.opacity + (end.opacity - start.opacity) * progress,
   };
 }
 
@@ -92,13 +88,7 @@ function getTargetPetalTransform(mode) {
 function getCurrentPetalTransform(petal) {
   const transformString =
     petal.style.transform || petal.getAttribute('transform') || 'scale(1)';
-  const transform = parseTransform(transformString);
-  const opacity = parseFloat(petal.style.opacity) || 1;
-
-  return {
-    ...transform,
-    opacity: opacity,
-  };
+  return parseTransform(transformString);
 }
 
 function updatePetalTransform(petal, transform) {
@@ -108,7 +98,6 @@ function updatePetalTransform(petal, transform) {
     transform.translateY
   );
   petal.style.transform = transformString;
-  petal.style.opacity = transform.opacity;
 }
 
 // calculates how long the animation of petal should be based on its transform
@@ -138,12 +127,6 @@ function animatePetal(petal) {
       startTransform,
       targetTransform
     );
-    console.log({
-      startTransform,
-      targetTransform,
-      animationDuration,
-      petalMode,
-    });
 
     function animate() {
       const elapsed = Date.now() - startTime;
