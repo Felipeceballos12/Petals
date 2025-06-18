@@ -15,7 +15,7 @@ const PETAL_STATES = {
 };
 
 const ANIMATION = {
-  DURATION: 2000,
+  DURATION: 1000,
   MIN_DURATION: 100,
   MAX_SCALE: 1, // Used for calculating effective duration
 };
@@ -48,22 +48,19 @@ let currentPetalIndex = 0;
 // TRANSFORM UTILITY FUNCTIONS
 function parseTransform(transformString) {
   const scaleMatch = transformString.match(/scale\(([^)]+)\)/);
-  const translateMatch = transformString.match(/translate\(([^)]+)\)/);
+  const translateMatch = transformString.match(
+    /translate\([^,)]*,\s*([^)]+)\)/
+  ); // this will pull out both translateX and translateY but we only want translateY
 
   const scale = scaleMatch ? parseFloat(scaleMatch[1]) : 1;
-  const translateValues = translateMatch
-    ? translateMatch[1].split(',').map((v) => parseFloat(v.trim()))
-    : [0, 0];
+  const translateY = translateMatch ? parseFloat(translateMatch[1]) : 0;
 
-  return {
-    scale: scale,
-    translateX: translateValues[0] || 0,
-    translateY: translateValues[1] || 0,
-  };
+  return { scale, translateY };
 }
 
-function createTransformString(scale, translateX = 0, translateY = 0) {
-  return `scale(${scale}) translate(${translateX}px, ${translateY}px)`;
+// we set translateX to be 0px as it shouldn't be set to anything during this animation
+function createTransformString(scale, translateY = 0) {
+  return `scale(${scale}) translate(0px, ${translateY}px)`;
 }
 
 // use for debugging
@@ -84,7 +81,6 @@ function getCurrentPetalTransform(petal) {
 function updatePetalTransform(petal, transform) {
   const transformString = createTransformString(
     transform.scale,
-    transform.translateX,
     transform.translateY
   );
   petal.style.transform = transformString;
@@ -103,9 +99,6 @@ function calculatePetalTransform(startTransform, targetTransform, progress) {
     scale:
       startTransform.scale +
       (targetTransform.scale - startTransform.scale) * progress,
-    translateX:
-      startTransform.translateX +
-      (targetTransform.translateX - startTransform.translateX) * progress,
     translateY:
       startTransform.translateY +
       (targetTransform.translateY - startTransform.translateY) * progress,
@@ -127,6 +120,7 @@ function animatePetal(petal) {
       startTransform,
       targetTransform
     );
+    console.log({ startTransform, targetTransform, animationDuration });
 
     function animate() {
       const elapsed = Date.now() - startTime;
@@ -137,6 +131,7 @@ function animatePetal(petal) {
         targetTransform,
         progress
       );
+      console.log({ elapsed, progress, currentTransform });
       updatePetalTransform(petal, currentTransform);
 
       if (progress < 1) {
@@ -221,17 +216,20 @@ function setIdleState() {
   pauseBtn.disabled = true;
   stopBtn.disabled = true;
 }
+
 function setPlayingState() {
   animationState = STATES.PLAYING;
   startBtn.disabled = true;
   pauseBtn.disabled = false;
   stopBtn.disabled = false;
 }
+
 function setPausingState() {
   animationState = STATES.PAUSING;
   startBtn.disabled = true;
   stopBtn.disabled = false;
 }
+
 function setStoppingState() {
   animationState = STATES.STOPPING;
   startBtn.disabled = false;
