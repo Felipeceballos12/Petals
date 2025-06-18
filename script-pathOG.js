@@ -15,7 +15,7 @@ const PETAL_STATES = {
 };
 
 const ANIMATION = {
-  DURATION: 200,
+  DURATION: 2000,
   MIN_DURATION: 100,
   MAX_SCALE: 1, // Used for calculating effective duration
 };
@@ -66,16 +66,6 @@ function createTransformString(scale, translateX = 0, translateY = 0) {
   return `scale(${scale}) translate(${translateX}px, ${translateY}px)`;
 }
 
-function interpolateTransforms(start, end, progress) {
-  return {
-    scale: start.scale + (end.scale - start.scale) * progress,
-    translateX:
-      start.translateX + (end.translateX - start.translateX) * progress,
-    translateY:
-      start.translateY + (end.translateY - start.translateY) * progress,
-  };
-}
-
 // use for debugging
 function log() {
   console.log({ animationState, petalMode, currentPetalIndex });
@@ -109,7 +99,17 @@ function calculateAnimationDuration(startTransform, targetTransform) {
 
 // calculates where the next transform should be, based on start transform, target transform and current progress
 function calculatePetalTransform(startTransform, targetTransform, progress) {
-  return interpolateTransforms(startTransform, targetTransform, progress);
+  return {
+    scale:
+      startTransform.scale +
+      (targetTransform.scale - startTransform.scale) * progress,
+    translateX:
+      startTransform.translateX +
+      (targetTransform.translateX - startTransform.translateX) * progress,
+    translateY:
+      startTransform.translateY +
+      (targetTransform.translateY - startTransform.translateY) * progress,
+  };
 }
 
 function animatePetal(petal) {

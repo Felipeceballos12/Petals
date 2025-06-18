@@ -7,13 +7,13 @@ const PETAL_STATES = {
   },
   HIDDEN: {
     scale: 0.4,
-    translateY: 20,
+    translateY: 0,
     opacity: 0,
   },
   RESET: {
     scale: 0,
     translateY: 0,
-    opacity: 0,
+    opacity: 1,
   },
 };
 
@@ -69,14 +69,40 @@ function createTransformString(scale, translateX = 0, translateY = 0) {
   return `scale(${scale}) translate(${translateX}px, ${translateY}px)`;
 }
 
+function calculateOpacity(currentScale, mode) {
+  if (mode === MODES.ADD) {
+    // Opacity starts changing when scale < 0.8
+    if (currentScale <= 0.7) {
+      return 1;
+    } else {
+      // Map scale from 0 to 0.8 → opacity from 0 to 1
+      return Math.max(0, currentScale / 0.8);
+    }
+  } else if (mode === MODES.REMOVE) {
+    // Opacity starts changing when scale > 0.5
+    if (currentScale >= 0.8) {
+      return 0;
+    } else {
+      // Map scale from 0.5 to 1 → opacity from 0 to 1
+      return Math.min(1, (currentScale - 0.8) / 0.8);
+    }
+  }
+  return 1;
+}
+
 function interpolateTransforms(start, end, progress) {
+  const currentScale = start.scale + (end.scale - start.scale) * progress;
+  console.log('Current Scale: ', currentScale);
+  const opacity = calculateOpacity(currentScale, petalMode);
+  console.log({ opacity });
+
   return {
-    scale: start.scale + (end.scale - start.scale) * progress,
+    scale: currentScale,
     translateX:
       start.translateX + (end.translateX - start.translateX) * progress,
     translateY:
       start.translateY + (end.translateY - start.translateY) * progress,
-    opacity: start.opacity + (end.opacity - start.opacity) * progress,
+    opacity: opacity,
   };
 }
 
@@ -93,7 +119,7 @@ function getCurrentPetalTransform(petal) {
   const transformString =
     petal.style.transform || petal.getAttribute('transform') || 'scale(1)';
   const transform = parseTransform(transformString);
-  const opacity = parseFloat(petal.style.opacity) || 1;
+  const opacity = parseFloat(petal.style.opacity) || 0;
 
   return {
     ...transform,
@@ -118,9 +144,41 @@ function calculateAnimationDuration(startTransform, targetTransform) {
   return Math.max(remainingRatio * ANIMATION.DURATION, ANIMATION.MIN_DURATION);
 }
 
+function interpolateTransforms(start, end, progress) {
+  const currentScale = start.scale + (end.scale - start.scale) * progress;
+  console.log('Current Scale: ', currentScale);
+  const opacity = calculateOpacity(currentScale, petalMode);
+  console.log({ opacity });
+
+  return {
+    scale: currentScale,
+    translateX:
+      start.translateX + (end.translateX - start.translateX) * progress,
+    translateY:
+      start.translateY + (end.translateY - start.translateY) * progress,
+    opacity: opacity,
+  };
+}
+
 // calculates where the next transform should be, based on start transform, target transform and current progress
 function calculatePetalTransform(startTransform, targetTransform, progress) {
-  return interpolateTransforms(startTransform, targetTransform, progress);
+  const currentScale =
+    startTransform.scale +
+    (targetTransform.scale - startTransform.scale) * progress;
+  console.log('Current Scale: ', currentScale);
+  const opacity = calculateOpacity(currentScale, petalMode);
+  console.log({ opacity });
+
+  return {
+    scale: currentScale,
+    translateX:
+      startTransform.translateX +
+      (targetTransform.translateX - startTransform.translateX) * progress,
+    translateY:
+      startTransform.translateY +
+      (targetTransform.translateY - startTransform.translateY) * progress,
+    opacity: opacity,
+  };
 }
 
 function animatePetal(petal) {
